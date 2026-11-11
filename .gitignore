@@ -1,0 +1,11 @@
+*.class
+*.log
+.metals
+.bloop
+.bsp
+.idea
+.vscode
+out
+results
+.env
+.DS_Store

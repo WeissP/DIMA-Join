@@ -1,0 +1,70 @@
+//| mill-jvm-version: system
+//| mill-version: 1.0.4
+//| mvnDeps:
+//| - com.goyeau::mill-scalafix::0.6.0
+
+package build
+
+import com.goyeau.mill.scalafix.ScalafixModule
+import mill.javalib.Assembly._
+import mill._
+import mill.scalalib._
+import coursier.Repositories
+import mill.api.Task.Simple
+
+object dima extends ScalaModule with ScalafixModule {
+  def scalaVersion    = "3.3.6"
+  def ammoniteVersion = "3.0.2"
+
+  override def assemblyRules = super.assemblyRules ++ Seq(
+    Rule.ExcludePattern("org.apache.logging.slf4j.*"),
+    Rule.ExcludePattern("org.slf4j.*"),
+    Rule.ExcludePattern("org/apache/storm/.*"),
+    Rule.ExcludePattern(".*/org.apache.storm.*"),
+    Rule.ExcludePattern("defaults.yaml"),
+  )
+
+  override def repositoriesTask = Task.Anon {
+    super.repositoriesTask() ++
+      Seq(coursier.MavenRepository("http://clojars.org/repo"))
+  }
+
+  def scalacOptions = Seq(
+    "-source:future",
+    "-Yretain-trees",
+    "-Ykind-projector",
+    "-Yexplicit-nulls",
+    "-Wunused:imports",
+  )
+
+  def mvnDeps = Seq(
+    mvn"com.github.pathikrit::better-files:3.9.2",
+    mvn"com.github.tototoshi::scala-csv:2.0.0",
+    mvn"com.typesafe.scala-logging::scala-logging:3.9.4",
+    mvn"io.circe::circe-core:0.14.10",
+    mvn"com.outr::scribe:3.16.0",
+    mvn"com.outr::scribe-file:3.16.0",
+    mvn"com.outr::scribe-json-circe:3.16.0",
+    mvn"org.codehaus.janino:janino:3.1.9",
+    mvn"org.apache.storm:storm-core:2.4.0",
+    mvn"org.typelevel::cats-core::2.9.0",
+    mvn"bigml:histogram:4.1.2",
+    mvn"ch.qos.logback:logback-classic:1.5.16",
+    mvn"com.typesafe.scala-logging::scala-logging:3.9.4",
+    mvn"org.typelevel::kittens:3.4.0",
+    mvn"com.dynatrace.dynahist:dynahist:1.4",
+    mvn"org.apache.lucene:lucene-core:10.2.2",
+    mvn"com.github.mjakubowski84::parquet4s-core:2.20.0",
+    mvn"org.apache.hadoop:hadoop-client:3.3.6",
+    mvn"org.apache.avro:avro:1.11.4",
+    mvn"org.roaringbitmap:RoaringBitmap:1.6.13",
+    mvn"org.roaringbitmap:bsi:1.6.13",
+  )
+
+  object test extends ScalaTests with TestModule.Utest with ScalafixModule {
+    def mvnDeps = Seq(
+      mvn"com.lihaoyi::utest::0.8.5",
+      mvn"org.scalacheck::scalacheck:1.18.1",
+    )
+  }
+}
